@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Camera } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { CardHeader, CardTitle, CardContent } from "./ui/card";
 import type { JamendoTrack } from '../api/api';
 import type { VideoOption } from '../types/video';
 
@@ -15,8 +15,14 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
     selectedMusic,
     withMusic
 }) => {
+    const previewRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, [selectedVideo]);
+
     return (
-        <Card>
+        <div ref={previewRef}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Camera className="w-6 h-6" />
@@ -47,6 +53,6 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
                     )}
                 </div>
             </CardContent>
-        </Card>
+        </div>
     );
 };

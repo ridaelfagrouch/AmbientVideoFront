@@ -1,3 +1,4 @@
+
 .hide-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -14,8 +15,12 @@
     }
 }
 
+.grid-flow-col {
+    grid-auto-flow: column dense;
+}
+
 @media (max-width: 639px) {
-    .grid-flow-col {
-        grid-auto-flow: column dense;
+    .grid-rows-1 {
+        grid-template-rows: 1fr;
     }
 }

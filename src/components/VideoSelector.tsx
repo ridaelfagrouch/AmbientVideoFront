@@ -1,5 +1,5 @@
-import React from 'react';
-import { Camera } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { VideoOption } from '../types/video';
 
 interface VideoSelectorProps {
@@ -10,8 +10,8 @@ interface VideoSelectorProps {
 }
 
 const VideoSkeleton = () => (
-    <div className="animate-pulse">
-        <div className="w-full h-[190px] bg-gray-200 rounded-lg" />
+    <div className="flex-shrink-0 w-full animate-pulse">
+        <div className="w-full aspect-video bg-gray-200 rounded-lg" />
     </div>
 );
 
@@ -21,64 +21,110 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
     onVideoSelect,
     loading
 }) => {
-    const skeletonCount = 9;
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = window.innerWidth * 0.8;
+            scrollContainerRef.current.scrollTo({
+                left: scrollContainerRef.current.scrollLeft +
+                    (direction === 'left' ? -scrollAmount : scrollAmount),
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    const handleVideoInteraction = (videoId: number, action: 'enter' | 'leave') => {
+        const video = videoRefs.current[videoId];
+        if (video) {
+            if (action === 'enter') {
+                video.play().catch(() => {
+                    // Handle autoplay failure silently
+                });
+            } else {
+                video.pause();
+                video.currentTime = 0;
+            }
+        }
+    };
 
     return (
         <div className="space-y-4 mb-8">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Camera className="w-5 h-5" />
+            <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
                 Available Videos
             </h3>
 
-            {/* Container with overflow handling */}
-            <div className="relative overflow-x-auto custom-scrollbar">
-                <div className="min-h-[620px]">
-                    <div
-                        className="grid grid-flow-col grid-rows-3 auto-cols-[360px] gap-3"
-                        style={{
-                            width: videos.length <= 9 ? '100%' : 'max-content',
-                            maxWidth: videos.length <= 9 ? '100%' : 'none'
-                        }}
-                    >
-                        {loading ? (
-                            // Skeleton loading state
-                            [...Array(skeletonCount)].map((_, index) => (
-                                <div key={`skeleton-${index}`}>
-                                    <VideoSkeleton />
-                                </div>
-                            ))
-                        ) : videos.length === 0 ? (
-                            <div className="col-span-full text-center py-8">
-                                <p className="text-gray-600">No videos found. Try a different theme.</p>
-                            </div>
-                        ) : (
-                            videos.map(video => (
+            <div className="relative group">
+                <button
+                    onClick={() => scroll('left')}
+                    className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 sm:p-2 
+                        rounded-full bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
+                        opacity-0 group-hover:opacity-100"
+                >
+                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+
+                <button
+                    onClick={() => scroll('right')}
+                    className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 sm:p-2 
+                        rounded-full bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
+                        opacity-0 group-hover:opacity-100"
+                >
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+
+                <div
+                    ref={scrollContainerRef}
+                    className="overflow-x-auto hide-scrollbar"
+                >
+                    {loading ? (
+                        <div className="grid grid-rows-1 sm:grid-rows-3 auto-cols-[280px] sm:auto-cols-[300px] 
+                            md:auto-cols-[320px] grid-flow-col gap-3 sm:gap-4 p-2 sm:p-4"
+                        >
+                            {[...Array(9)].map((_, index) => (
+                                <VideoSkeleton key={`skeleton-${index}`} />
+                            ))}
+                        </div>
+                    ) : videos.length === 0 ? (
+                        <div className="text-center py-6 sm:py-8">
+                            <p className="text-gray-600 text-sm sm:text-base">
+                                No videos found. Try a different theme.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-rows-1 sm:grid-rows-3 auto-cols-[280px] sm:auto-cols-[300px] 
+                            md:auto-cols-[320px] grid-flow-col gap-3 sm:gap-4 p-2 sm:p-4"
+                        >
+                            {videos.map(video => (
                                 <div
                                     key={video.id}
                                     onClick={() => onVideoSelect(video)}
-                                    className={`cursor-pointer rounded-lg overflow-hidden border-2 transition-colors ${selectedVideo?.id === video.id
-                                            ? 'border-blue-500'
+                                    onMouseEnter={() => handleVideoInteraction(video.id, 'enter')}
+                                    onMouseLeave={() => handleVideoInteraction(video.id, 'leave')}
+                                    className={`cursor-pointer rounded-lg overflow-hidden border-2 transition-all
+                                        hover:shadow-lg ${selectedVideo?.id === video.id
+                                            ? 'border-blue-500 shadow-md'
                                             : 'border-transparent hover:border-blue-200'
                                         }`}
                                 >
-                                    <div className="relative group">
+                                    <div className="relative group aspect-video">
                                         <video
+                                            ref={el => videoRefs.current[video.id] = el}
                                             src={video.preview_url}
-                                            className="w-full h-[190px] object-cover"
+                                            className="w-full h-full object-cover"
                                             muted
                                             loop
-                                            onMouseOver={e => e.currentTarget.play()}
-                                            onMouseOut={e => {
-                                                e.currentTarget.pause();
-                                                e.currentTarget.currentTime = 0;
-                                            }}
+                                            playsInline
                                         />
-                                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity" />
+                                        <div className="absolute inset-0 bg-black bg-opacity-0 
+                                            group-hover:bg-opacity-10 transition-opacity" />
                                     </div>
                                 </div>
-                            ))
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
