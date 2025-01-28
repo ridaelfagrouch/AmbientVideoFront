@@ -131,7 +131,7 @@ export const MusicSelector: React.FC<MusicSelectorProps> = ({
     onMusicSelect,
     loading: initialLoading
 }) => {
-    const [activeCategory, setActiveCategory] = useState<MusicCategory>('relaxing');
+    const [activeCategory, setActiveCategory] = useState<MusicCategory>('Relaxing');
     const [music, setMusic] = useState<JamendoTrack[]>(initialMusic);
     const [loading, setLoading] = useState(initialLoading);
     const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});

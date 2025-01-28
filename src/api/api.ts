@@ -268,7 +268,7 @@ export const fetchAmbientMusic = async (
 
     // Filter out tracks without audio
     const validTracks = data.results
-      .filter(track => track.audio)
+      .filter((track: any) => track.audio)
       .map((track: JamendoTrack) => ({
         id: track.id || `track-${Math.random()}`,
         name: track.name || "Untitled Track",
