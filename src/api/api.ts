@@ -22,9 +22,9 @@ export interface JamendoTrack {
   name: string;
   duration: number;
   artist_name: string;
-  audio: string; // Stream URL
-  audiodownload: string; // Download URL
-  image: string; // Album/Track artwork
+  audio: string;
+  audiodownload: string;
+  image: string;
 }
 
 // Define theme tags for better type safety
@@ -55,44 +55,6 @@ export const themeToTags: Record<string, string> = {
   zen: "meditation,zen,peaceful",
   dream: "dream,ambient,soft",
 };
-
-// export const fetchBackgroundVideos = async (
-//   theme: string
-// ): Promise<PexelsVideo[]> => {
-//   try {
-//     // Add additional search terms for better video results
-  
-
-//     const searchQuery = searchTerms[theme as keyof typeof searchTerms] || theme;
-
-//     const response = await fetch(
-//       `https://api.pexels.com/videos/search?query=${encodeURIComponent(
-//         searchQuery
-//       )}&per_page=15&orientation=landscape`,
-//       {
-//         headers: {
-//           Authorization: PEXELS_API_KEY,
-//         },
-//       }
-//     );
-
-//     if (!response.ok) {
-//       throw new Error(`Failed to fetch videos: ${response.statusText}`);
-//     }
-
-//     const data = await response.json();
-
-//     if (!data.videos || !Array.isArray(data.videos)) {
-//       console.warn("No videos found in response:", data);
-//       return [];
-//     }
-
-//     return data.videos;
-//   } catch (error) {
-//     console.error("Error fetching videos:", error);
-//     return [];
-//   }
-// };
 
 export const fetchBackgroundVideos = async (
   theme: string,
@@ -224,38 +186,102 @@ export const fetchBackgroundVideos = async (
   }
 };
 
+// ------------------------------------------------------------------------------------------------
+
+// api.ts
+const musicSearchTerms: Record<string, string[]> = {
+    // Core Categories
+    'Ambient': ['ambient', 'background', 'atmosphere'],
+    'Electronic': ['electronic', 'ambient', 'synth'],
+    'Classical': ['classical', 'orchestra', 'instrumental'],
+    'Piano': ['piano', 'instrumental', 'ambient'],
+    'Cinematic': ['soundtrack', 'cinematic', 'orchestral'],
+    'Meditation': ['meditation', 'ambient', 'relax'],
+    'Chillout': ['chillout', 'downtempo', 'ambient'],
+    'Lofi': ['lofi', 'chill', 'beats'],
+    'Instrumental': ['instrumental', 'background', 'ambient'],
+
+    // Moods
+    'Relaxing': ['relaxing', 'calm', 'peaceful'],
+    'Peaceful': ['peaceful', 'ambient', 'calm'],
+    'Calm': ['calm', 'relaxing', 'ambient'],
+    'Atmospheric': ['atmospheric', 'ambient', 'soundscape'],
+
+    // Nature
+    'Nature': ['nature', 'ambient', 'soundscape'],
+    'Ocean': ['ocean', 'water', 'ambient'],
+    'Rain': ['rain', 'ambient', 'nature'],
+    'Forest': ['forest', 'nature', 'ambient'],
+
+    // Styles
+    'Minimal': ['minimal', 'ambient', 'electronic'],
+    'Drone': ['drone', 'ambient', 'atmospheric'],
+    'Space': ['space', 'ambient', 'atmospheric'],
+    'World': ['world', 'ethnic', 'ambient'],
+    'Jazz': ['jazz', 'smooth', 'ambient'],
+    'Orchestra': ['orchestra', 'classical', 'instrumental'],
+
+    // Specialized
+    'Sleep': ['sleep', 'relaxing', 'ambient'],
+    'Focus': ['focus', 'concentration', 'ambient'],
+    'Zen': ['zen', 'meditation', 'peaceful'],
+    'Fantasy': ['fantasy', 'magical', 'ambient']
+};
+
 export const fetchAmbientMusic = async (
   category: string
 ): Promise<JamendoTrack[]> => {
   try {
-    const apiUrl = `https://api.jamendo.com/v3.0/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=15&include=musicinfo&orderby=popularity_total&search=${encodeURIComponent(
-        category.toLowerCase()
-      )}`;
+    // Get search terms for the category or use category name as fallback
+    const searchTerms = musicSearchTerms[category] || [category.toLowerCase()];
+    
+    // Build search query with multiple terms
+    const searchQuery = searchTerms.join(' OR ');
+    
+    // Include tags and search parameters for better results
+    const params = new URLSearchParams({
+      client_id: JAMENDO_CLIENT_ID,
+      format: 'json',
+      limit: '30',  // Increased limit for better chances
+      include: 'musicinfo',
+      tags: searchTerms[0], // Use first term as tag
+      search: searchQuery,  // Use all terms in search
+      orderby: 'popularity_total',
+      audioformat: 'mp32',
+      boost: 'popularity_total'
+    });
 
+    const apiUrl = `https://api.jamendo.com/v3.0/tracks/?${params.toString()}`;
     console.log("Fetching music from:", apiUrl);
 
     const response = await fetch(apiUrl);
     const data = await response.json();
-    console.log("API Response:", data);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch music: ${response.statusText}`);
     }
 
     if (!data.results || !Array.isArray(data.results)) {
-      console.warn("No tracks found in response:", data);
+      console.warn("No tracks found for category:", category);
       return [];
     }
 
-    return data.results.map((track: JamendoTrack) => ({
-      id: track.id || `track-${Math.random()}`,
-      name: track.name || "Untitled Track",
-      duration: track.duration || 0,
-      artist_name: track.artist_name || "Unknown Artist",
-      audio: track.audio || "",
-      audiodownload: track.audiodownload || track.audio || "",
-      image: track.image || "",
-    }));
+    // Filter out tracks without audio
+    const validTracks = data.results
+      .filter(track => track.audio)
+      .map((track: JamendoTrack) => ({
+        id: track.id || `track-${Math.random()}`,
+        name: track.name || "Untitled Track",
+        duration: track.duration || 0,
+        artist_name: track.artist_name || "Unknown Artist",
+        audio: track.audio || "",
+        audiodownload: track.audiodownload || track.audio || "",
+        image: track.image || "",
+      }));
+
+    console.log(`Found ${validTracks.length} valid tracks for category: ${category}`);
+    return validTracks;
+
   } catch (error) {
     console.error("Error fetching music:", error);
     return [];

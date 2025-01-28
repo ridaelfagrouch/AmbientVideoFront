@@ -436,6 +436,185 @@ export const themes: Theme[] = [
     musicTags: "healing,ambient,soothing",
     category: "Relaxation",
   },
+
+  {
+    id: "underwater",
+    name: "Underwater",
+    icon: "🌊",
+    musicTags: "underwater,ambient,peaceful",
+    category: "Underwater",
+  },
+  {
+    id: "coral_reef",
+    name: "Coral Reef",
+    icon: "🐠",
+    musicTags: "ocean,ambient,tropical",
+    category: "Underwater",
+  },
+  {
+    id: "deep_sea",
+    name: "Deep Sea",
+    icon: "🦑",
+    musicTags: "deep,ambient,mysterious",
+    category: "Underwater",
+  },
+  {
+    id: "marine_life",
+    name: "Marine Life",
+    icon: "🐋",
+    musicTags: "ocean,nature,peaceful",
+    category: "Underwater",
+  },
+
+  // Wildlife
+  {
+    id: "safari",
+    name: "Safari",
+    icon: "🦁",
+    musicTags: "africa,ambient,wild",
+    category: "Wildlife",
+  },
+  {
+    id: "birds",
+    name: "Birds",
+    icon: "🦜",
+    musicTags: "nature,birds,peaceful",
+    category: "Wildlife",
+  },
+  {
+    id: "butterfly",
+    name: "Butterfly",
+    icon: "🦋",
+    musicTags: "nature,gentle,peaceful",
+    category: "Wildlife",
+  },
+  {
+    id: "wildlife",
+    name: "Wildlife",
+    icon: "🦒",
+    musicTags: "nature,wild,ambient",
+    category: "Wildlife",
+  },
+
+  // Time of Day
+  {
+    id: "sunrise",
+    name: "Sunrise",
+    icon: "🌅",
+    musicTags: "morning,ambient,peaceful",
+    category: "TimeOfDay",
+  },
+  {
+    id: "golden_hour",
+    name: "Golden Hour",
+    icon: "🌇",
+    musicTags: "sunset,ambient,warm",
+    category: "TimeOfDay",
+  },
+  {
+    id: "twilight",
+    name: "Twilight",
+    icon: "🌆",
+    musicTags: "evening,ambient,calm",
+    category: "TimeOfDay",
+  },
+  {
+    id: "midnight",
+    name: "Midnight",
+    icon: "🌃",
+    musicTags: "night,dark,ambient",
+    category: "TimeOfDay",
+  },
+
+  // Weather
+  {
+    id: "storm",
+    name: "Storm",
+    icon: "⛈️",
+    musicTags: "storm,powerful,intense",
+    category: "Weather",
+  },
+  {
+    id: "fog",
+    name: "Fog",
+    icon: "🌫️",
+    musicTags: "misty,ambient,mysterious",
+    category: "Weather",
+  },
+  {
+    id: "rainbow",
+    name: "Rainbow",
+    icon: "🌈",
+    musicTags: "happy,peaceful,gentle",
+    category: "Weather",
+  },
+  {
+    id: "northern_lights",
+    name: "Northern Lights",
+    icon: "🌌",
+    musicTags: "aurora,ambient,magical",
+    category: "Weather",
+  },
+
+  // Ancient Places
+  {
+    id: "ruins",
+    name: "Ancient Ruins",
+    icon: "🏛️",
+    musicTags: "ancient,mysterious,ambient",
+    category: "Ancient",
+  },
+  {
+    id: "pyramid",
+    name: "Pyramids",
+    icon: "🔺",
+    musicTags: "egyptian,ancient,mystical",
+    category: "Ancient",
+  },
+  {
+    id: "ancient_forest",
+    name: "Ancient Forest",
+    icon: "🌳",
+    musicTags: "forest,mysterious,ancient",
+    category: "Ancient",
+  },
+  {
+    id: "lost_city",
+    name: "Lost City",
+    icon: "🗿",
+    musicTags: "ancient,mysterious,epic",
+    category: "Ancient",
+  },
+
+  // Motion & Patterns
+  {
+    id: "particles",
+    name: "Particles",
+    icon: "✨",
+    musicTags: "abstract,electronic,ambient",
+    category: "Motion",
+  },
+  {
+    id: "waves",
+    name: "Wave Patterns",
+    icon: "〰️",
+    musicTags: "minimal,electronic,ambient",
+    category: "Motion",
+  },
+  {
+    id: "fractals",
+    name: "Fractals",
+    icon: "🌀",
+    musicTags: "electronic,abstract,complex",
+    category: "Motion",
+  },
+  {
+    id: "light_trails",
+    name: "Light Trails",
+    icon: "💫",
+    musicTags: "urban,night,ambient",
+    category: "Motion",
+  },
 ];
 
 

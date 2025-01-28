@@ -4,12 +4,44 @@ import type { JamendoTrack } from '../types/music';
 import { fetchAmbientMusic } from '../api/api';
 import '../styles/MusicSelector.css';
 
+
 const musicCategories = [
-    'relaxing', 'Ambient', 'Electronic', 'Classical', 'Jazz',
-    'Rock', 'Pop', 'Folk', 'World', 'Instrumental', 'Acoustic',
-    'Orchestral', 'Piano', 'Guitar', 'Chillout', 'Blues',
-    'Latin', 'Reggae', 'Soul', 'Country', 'Metal', 'Soundtrack',
-    'Lounge', 'House', 'Meditation', 'Techno'
+    // Core Ambient Categories
+    'Ambient',
+    'Electronic',
+    'Classical',
+    'Piano',
+    'Cinematic',
+    'Meditation',
+    'Chillout',
+    'Lofi',
+    'Instrumental',
+
+    // Moods
+    'Relaxing',
+    'Peaceful',
+    'Calm',
+    'Atmospheric',
+
+    // Nature-Based
+    'Nature',
+    'Ocean',
+    'Rain',
+    'Forest',
+
+    // Styles
+    'Minimal',
+    'Drone',
+    'Space',
+    'World',
+    'Jazz',
+    'Orchestra',
+
+    // Specialized
+    'Sleep',
+    'Focus',
+    'Zen',
+    'Fantasy'
 ] as const;
 
 type MusicCategory = typeof musicCategories[number];
