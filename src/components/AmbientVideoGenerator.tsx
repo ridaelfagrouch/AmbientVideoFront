@@ -1,6 +1,4 @@
-// AmbientVideoGenerator.tsx
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Video } from 'lucide-react';
 import type { JamendoTrack } from '../api/api';
 import type { VideoOption, VideoSettings } from '../types/video';
@@ -13,7 +11,9 @@ import { GenerateButton } from './GenerateButton';
 import { mergeVideoAndAudio } from '../services/videoService';
 import { FormatSelector } from './FormatSelector';
 import { DurationFilter } from './DurationFilter';
-
+import BackgroundLayout from './BackgroundLayout';
+import '../styles/AmbientVideoGenerator.css';
+import IntroSection from './IntroSection';
 
 const AmbientVideoGenerator: React.FC = () => {
     const [videoSettings, setVideoSettings] = useState<VideoSettings>({
@@ -39,8 +39,6 @@ const AmbientVideoGenerator: React.FC = () => {
         error: musicError
     } = useMusic(videoSettings.theme, videoSettings.withMusic);
 
-    
-
     const handleFormatSelect = useCallback((format: 'webm' | 'mp4' | 'mov') => {
         setVideoSettings(prev => ({ ...prev, format }));
     }, []);
@@ -64,31 +62,6 @@ const AmbientVideoGenerator: React.FC = () => {
             selectedMusic: e.target.checked ? prev.selectedMusic : undefined
         }));
     }, []);
-
-    // const handleGeneration = async () => {
-    //     if (!videoSettings.selectedVideo) return;
-
-    //     setGenerating(true);
-    //     try {
-    //         const videoUrl = videoSettings.selectedVideo.download_url;
-    //         const audioUrl = videoSettings.withMusic && videoSettings.selectedMusic
-    //             ? videoSettings.selectedMusic.audio
-    //             : '';
-
-    //         const blob = await mergeVideoAndAudio(
-    //             videoUrl,
-    //             audioUrl,
-    //             videoSettings.format
-    //         );
-
-    //         const url = URL.createObjectURL(blob);
-    //         setDownloadUrl(url);
-    //     } catch (error) {
-    //         console.error('Error generating video:', error);
-    //     } finally {
-    //         setGenerating(false);
-    //     }
-    // };
 
     const handleGeneration = async (onProgress: (progress: number, status: string) => void) => {
         if (!videoSettings.selectedVideo) return;
@@ -115,7 +88,7 @@ const AmbientVideoGenerator: React.FC = () => {
             setGenerating(false);
         }
     };
-    
+
     const handleReset = useCallback(() => {
         if (downloadUrl) {
             URL.revokeObjectURL(downloadUrl);
@@ -134,48 +107,47 @@ const AmbientVideoGenerator: React.FC = () => {
     const error = videoError || musicError;
     if (error) {
         return (
-            <div className="fixed inset-0 bg-gradient-to-br from-gray-900 to-gray-800 overflow-auto">
+            <BackgroundLayout>
                 <div className="min-h-screen p-8 flex items-center justify-center">
-                    <Card className="w-full max-w-md backdrop-blur-sm bg-white/95">
-                        <CardContent className="p-6">
-                            <p className="text-red-500 text-center">
-                                {error instanceof Error ? error.message : 'An error occurred'}
-                            </p>
-                            <button
-                                onClick={() => window.location.reload()}
-                                className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                            >
-                                Retry
-                            </button>
-                        </CardContent>
-                    </Card>
+                    <div className="glass-container relative rounded-xl p-6 w-full max-w-md">
+                        <p className="text-white text-center mb-4">
+                            {error instanceof Error ? error.message : 'An error occurred'}
+                        </p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </BackgroundLayout>
         );
     }
 
     return (
-        <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900 overflow-auto">
+        <BackgroundLayout>
             <div className="min-h-screen py-8 px-4 sm:px-6">
                 <div className="relative max-w-6xl mx-auto">
-                    <div
-                        className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-3xl blur-3xl -z-10"
-                        aria-hidden="true"
-                    />
+                    <div className="mb-8 space-y-6">
+                        {/* Title */}
+                        <div className="flex items-center gap-2 text-xl sm:text-2xl font-semibold text-white">
+                            <Video className="w-6 h-6 text-blue-400" />
+                            Ambient Video Generator
+                        </div>
 
-                    <Card className="mb-8 backdrop-blur-sm bg-white/95 border-white/20 shadow-xl">
-                        <CardHeader className="border-b border-gray-100/10">
-                            <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
-                                <Video className="w-6 h-6 text-blue-500" />
-                                Ambient Video Generator
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6 p-6">
+                        <IntroSection />
+
+                        {/* Theme Section */}
+                        <div className="glass-container relative rounded-xl p-6">
                             <ThemeSelector
                                 selectedTheme={videoSettings.theme}
                                 onThemeSelect={onThemeSelect}
                             />
+                        </div>
 
+                        {/* Duration Filter */}
+                        <div className="glass-container relative rounded-xl p-6">
                             <DurationFilter
                                 duration={videoSettings.duration_filter}
                                 onDurationChange={(duration) => setVideoSettings(prev => ({
@@ -183,41 +155,55 @@ const AmbientVideoGenerator: React.FC = () => {
                                     duration_filter: duration
                                 }))}
                             />
+                        </div>
 
+                        {/* Video Selector */}
+                        <div className="glass-container relative rounded-xl p-6">
                             <VideoSelector
                                 videos={videos}
                                 selectedVideo={videoSettings.selectedVideo}
                                 onVideoSelect={handleVideoSelect}
                                 loading={isLoadingVideos}
                             />
+                        </div>
 
-                            <div className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/90 hover:bg-gray-50 transition-colors">
+                        {/* Music Section */}
+                        <div className="glass-container relative rounded-xl p-6">
+                            <div className="flex items-center gap-3 p-2 rounded-lg">
                                 <input
                                     type="checkbox"
                                     id="music-toggle"
                                     checked={videoSettings.withMusic}
                                     onChange={handleMusicToggle}
-                                    className="w-4 h-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                                    className="w-4 h-4 rounded border-white/30 text-blue-500 focus:ring-blue-500 bg-white/20"
                                 />
-                                <label htmlFor="music-toggle" className="text-sm font-medium text-gray-700">
+                                <label htmlFor="music-toggle" className="text-sm font-medium text-white">
                                     Include Background Music
                                 </label>
                             </div>
 
                             {videoSettings.withMusic && (
-                                <MusicSelector
-                                    music={music}
-                                    selectedMusic={videoSettings.selectedMusic}
-                                    onMusicSelect={handleMusicSelect}
-                                    loading={isLoadingMusic}
-                                />
+                                <div className="mt-4">
+                                    <MusicSelector
+                                        music={music}
+                                        selectedMusic={videoSettings.selectedMusic}
+                                        onMusicSelect={handleMusicSelect}
+                                        loading={isLoadingMusic}
+                                    />
+                                </div>
                             )}
+                        </div>
 
+                        {/* Format Selector */}
+                        <div className="glass-container relative rounded-xl p-6">
                             <FormatSelector
                                 format={videoSettings.format}
                                 onFormatSelect={handleFormatSelect}
                             />
+                        </div>
 
+                        {/* Generate Button */}
+                        <div className="pt-4">
                             <GenerateButton
                                 videoSettings={videoSettings}
                                 generating={generating}
@@ -225,11 +211,12 @@ const AmbientVideoGenerator: React.FC = () => {
                                 onGenerate={handleGeneration}
                                 onReset={handleReset}
                             />
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
+                    {/* Preview Section */}
                     {videoSettings.selectedVideo && (
-                        <div className="transition-all duration-300 ease-in-out backdrop-blur-sm bg-white/95 border-white/20 shadow-xl rounded-lg">
+                        <div className="glass-container relative rounded-xl p-6 transition-all duration-300 ease-in-out">
                             <PreviewSection
                                 selectedVideo={videoSettings.selectedVideo}
                                 selectedMusic={videoSettings.selectedMusic}
@@ -240,7 +227,7 @@ const AmbientVideoGenerator: React.FC = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </BackgroundLayout>
     );
 };
 

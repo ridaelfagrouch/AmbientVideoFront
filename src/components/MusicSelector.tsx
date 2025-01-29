@@ -4,44 +4,13 @@ import type { JamendoTrack } from '../types/music';
 import { fetchAmbientMusic } from '../api/api';
 import '../styles/MusicSelector.css';
 
-
 const musicCategories = [
-    // Core Ambient Categories
-    'Ambient',
-    'Electronic',
-    'Classical',
-    'Piano',
-    'Cinematic',
-    'Meditation',
-    'Chillout',
-    'Lofi',
-    'Instrumental',
-
-    // Moods
-    'Relaxing',
-    'Peaceful',
-    'Calm',
-    'Atmospheric',
-
-    // Nature-Based
-    'Nature',
-    'Ocean',
-    'Rain',
-    'Forest',
-
-    // Styles
-    'Minimal',
-    'Drone',
-    'Space',
-    'World',
-    'Jazz',
-    'Orchestra',
-
-    // Specialized
-    'Sleep',
-    'Focus',
-    'Zen',
-    'Fantasy'
+    'Ambient', 'Electronic', 'Classical', 'Piano', 'Cinematic',
+    'Meditation', 'Chillout', 'Lofi', 'Instrumental', 'Relaxing',
+    'Peaceful', 'Calm', 'Atmospheric', 'Nature', 'Ocean',
+    'Rain', 'Forest', 'Minimal', 'Drone', 'Space',
+    'World', 'Jazz', 'Orchestra', 'Sleep', 'Focus',
+    'Zen', 'Fantasy'
 ] as const;
 
 type MusicCategory = typeof musicCategories[number];
@@ -51,6 +20,11 @@ interface MusicSelectorProps {
     selectedMusic?: JamendoTrack;
     onMusicSelect: (track: JamendoTrack) => void;
     loading: boolean;
+}
+
+interface ScrollState {
+    canScrollLeft: boolean;
+    canScrollRight: boolean;
 }
 
 const MusicCardSkeleton = () => (
@@ -107,8 +81,8 @@ const MusicCard: React.FC<MusicCardProps> = ({
         </h4>
 
         <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 flex items-center gap-1">
-            <User className="w-3 h-3 flex-shrink-0" />
-            <span className="truncate" title={track.artist_name}>
+            <User className="w-3 h-3 flex-shrink-0 text-white" />
+            <span className="truncate text-white" title={track.artist_name}>
                 {track.artist_name}
             </span>
         </p>
@@ -134,8 +108,48 @@ export const MusicSelector: React.FC<MusicSelectorProps> = ({
     const [activeCategory, setActiveCategory] = useState<MusicCategory>('Relaxing');
     const [music, setMusic] = useState<JamendoTrack[]>(initialMusic);
     const [loading, setLoading] = useState(initialLoading);
+    const [scrollState, setScrollState] = useState<ScrollState>({
+        canScrollLeft: false,
+        canScrollRight: false
+    });
+
     const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    const checkScrollability = (container: HTMLElement): ScrollState => {
+        const hasOverflow = container.scrollWidth > container.clientWidth;
+        if (!hasOverflow) {
+            return { canScrollLeft: false, canScrollRight: false };
+        }
+
+        return {
+            canScrollLeft: container.scrollLeft > 0,
+            canScrollRight: container.scrollLeft + container.clientWidth < container.scrollWidth - 1 // -1 for rounding errors
+        };
+    };
+
+    useEffect(() => {
+        const updateScrollState = () => {
+            if (scrollContainerRef.current) {
+                setScrollState(checkScrollability(scrollContainerRef.current));
+            }
+        };
+
+        updateScrollState();
+
+        const container = scrollContainerRef.current;
+        if (container) {
+            container.addEventListener('scroll', updateScrollState);
+            window.addEventListener('resize', updateScrollState);
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('scroll', updateScrollState);
+                window.removeEventListener('resize', updateScrollState);
+            }
+        };
+    }, [music, loading]);
 
     useEffect(() => {
         const loadMusic = async () => {
@@ -186,8 +200,8 @@ export const MusicSelector: React.FC<MusicSelectorProps> = ({
     return (
         <div className="space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between">
-                <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-                    <Music className="w-4 h-4 sm:w-5 sm:h-5" />
+                <h3 className="flex items-center gap-2 text-lg font-semibold">
+                    <Music className="w-4 h-4 sm:w-6 sm:h-6" />
                     Background Music
                 </h3>
             </div>
@@ -214,23 +228,25 @@ export const MusicSelector: React.FC<MusicSelectorProps> = ({
             </div>
 
             <div className="relative group">
-                <button
-                    onClick={() => scroll('left')}
-                    className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 sm:p-2 
-                        rounded-full bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
-                        opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
+                {scrollState.canScrollLeft && (
+                    <button
+                        onClick={() => scroll('left')}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full
+                            bg-gray-900/80 shadow-lg hover:bg-gray-900 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronLeft className="w-6 h-6 text-white" />
+                    </button>
+                )}
 
-                <button
-                    onClick={() => scroll('right')}
-                    className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 sm:p-2 
-                        rounded-full bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
-                        opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
+                {scrollState.canScrollRight && (
+                    <button
+                        onClick={() => scroll('right')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full
+                            bg-gray-900/80 shadow-lg hover:bg-gray-900 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronRight className="w-6 h-6 text-white" />
+                    </button>
+                )}
 
                 <div
                     ref={scrollContainerRef}

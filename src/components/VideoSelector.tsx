@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { VideoOption } from '../types/video';
 
@@ -7,6 +7,11 @@ interface VideoSelectorProps {
     selectedVideo?: VideoOption;
     onVideoSelect: (video: VideoOption) => void;
     loading: boolean;
+}
+
+interface ScrollState {
+    canScrollLeft: boolean;
+    canScrollRight: boolean;
 }
 
 const VideoSkeleton = () => (
@@ -23,6 +28,45 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
 }) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
+    const [scrollState, setScrollState] = useState<ScrollState>({
+        canScrollLeft: false,
+        canScrollRight: false
+    });
+
+    const checkScrollability = (container: HTMLElement): ScrollState => {
+        const hasOverflow = container.scrollWidth > container.clientWidth;
+        if (!hasOverflow) {
+            return { canScrollLeft: false, canScrollRight: false };
+        }
+
+        return {
+            canScrollLeft: container.scrollLeft > 0,
+            canScrollRight: container.scrollLeft + container.clientWidth < container.scrollWidth - 1
+        };
+    };
+
+    useEffect(() => {
+        const updateScrollState = () => {
+            if (scrollContainerRef.current) {
+                setScrollState(checkScrollability(scrollContainerRef.current));
+            }
+        };
+
+        updateScrollState();
+
+        const container = scrollContainerRef.current;
+        if (container) {
+            container.addEventListener('scroll', updateScrollState);
+            window.addEventListener('resize', updateScrollState);
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('scroll', updateScrollState);
+                window.removeEventListener('resize', updateScrollState);
+            }
+        };
+    }, [videos, loading]);
 
     const scroll = (direction: 'left' | 'right') => {
         if (scrollContainerRef.current) {
@@ -51,29 +95,31 @@ export const VideoSelector: React.FC<VideoSelectorProps> = ({
 
     return (
         <div className="space-y-4 mb-8">
-            <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-                <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Camera className="w-4 h-4 sm:w-6 sm:h-6" />
                 Available Videos
             </h3>
 
             <div className="relative group">
-                <button
-                    onClick={() => scroll('left')}
-                    className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 p-1.5 sm:p-2 
-                        rounded-full bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
-                        opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
+                {scrollState.canScrollLeft && (
+                    <button
+                        onClick={() => scroll('left')}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full
+                            bg-gray-900/80 shadow-lg hover:bg-gray-900 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronLeft className="w-6 h-6 text-white" />
+                    </button>
+                )}
 
-                <button
-                    onClick={() => scroll('right')}
-                    className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10 p-1.5 sm:p-2 
-                        rounded-full bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
-                        opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
+                {scrollState.canScrollRight && (
+                    <button
+                        onClick={() => scroll('right')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full
+                            bg-gray-900/80 shadow-lg hover:bg-gray-900 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronRight className="w-6 h-6 text-white" />
+                    </button>
+                )}
 
                 <div
                     ref={scrollContainerRef}

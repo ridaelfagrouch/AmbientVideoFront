@@ -32,8 +32,11 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({ format, onFormat
     ];
 
     return (
-        <div className="mb-6">
-            <label className="block text-base font-semibold mb-4">Output Format</label>
+        <div className="space-y-6 mb-6">
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Video className="w-4 h-4 sm:w-6 sm:h-6" />
+                Output Format
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {formats.map(({ value: formatValue, label, icon: Icon, description, features }) => (
                     <div

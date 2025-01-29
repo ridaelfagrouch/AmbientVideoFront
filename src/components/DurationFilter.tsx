@@ -18,7 +18,10 @@ export const DurationFilter: React.FC<DurationFilterProps> = ({ duration, onDura
 
     return (
         <div className="mb-6 space-y-4">
-            <label className="block text-base font-semibold">Video Duration</label>
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <History className="w-4 h-4 sm:w-6 sm:h-6" />
+                Video Duration
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {options.map(({ value, label, icon: Icon, description }) => (
                     <button

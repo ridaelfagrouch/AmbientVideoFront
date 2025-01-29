@@ -1,11 +1,16 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Palette } from 'lucide-react';
 import { ThemeCategory } from '../types/theme';
 import { getThemesByCategory, getAllCategories, themes } from '../data/themes';
 
 interface ThemeSelectorProps {
     selectedTheme: string;
     onThemeSelect: (themeId: string) => void;
+}
+
+interface ScrollState {
+    canScrollLeft: boolean;
+    canScrollRight: boolean;
 }
 
 type CategoryType = ThemeCategory | 'All';
@@ -15,6 +20,11 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
     onThemeSelect
 }) => {
     const [activeCategory, setActiveCategory] = useState<CategoryType>('All');
+    const [scrollState, setScrollState] = useState<ScrollState>({
+        canScrollLeft: false,
+        canScrollRight: false
+    });
+
     const categories = useMemo(() => ['All', ...getAllCategories()], []);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -24,6 +34,41 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         }
         return getThemesByCategory(activeCategory as ThemeCategory);
     }, [activeCategory]);
+
+    const checkScrollability = (container: HTMLElement): ScrollState => {
+        const hasOverflow = container.scrollWidth > container.clientWidth;
+        if (!hasOverflow) {
+            return { canScrollLeft: false, canScrollRight: false };
+        }
+
+        return {
+            canScrollLeft: container.scrollLeft > 0,
+            canScrollRight: container.scrollLeft + container.clientWidth < container.scrollWidth - 1
+        };
+    };
+
+    useEffect(() => {
+        const updateScrollState = () => {
+            if (scrollContainerRef.current) {
+                setScrollState(checkScrollability(scrollContainerRef.current));
+            }
+        };
+
+        updateScrollState();
+
+        const container = scrollContainerRef.current;
+        if (container) {
+            container.addEventListener('scroll', updateScrollState);
+            window.addEventListener('resize', updateScrollState);
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('scroll', updateScrollState);
+                window.removeEventListener('resize', updateScrollState);
+            }
+        };
+    }, [displayedThemes]);
 
     const scroll = (direction: 'left' | 'right') => {
         if (scrollContainerRef.current) {
@@ -38,7 +83,10 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
 
     return (
         <div className="space-y-6 mb-8">
-            <h3 className="text-lg font-semibold">Choose Theme</h3>
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Palette className="w-4 h-4 sm:w-6 sm:h-6" />
+                Choose Theme
+            </h3>
 
             {/* Category Navigation */}
             <div className="relative">
@@ -62,23 +110,25 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
 
             {/* Themes Container */}
             <div className="relative group">
-                <button
-                    onClick={() => scroll('left')}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full 
-                             bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
-                             opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronLeft className="w-6 h-6" />
-                </button>
+                {scrollState.canScrollLeft && (
+                    <button
+                        onClick={() => scroll('left')}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full
+                            bg-gray-900/80 shadow-lg hover:bg-gray-900 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronLeft className="w-6 h-6 text-white" />
+                    </button>
+                )}
 
-                <button
-                    onClick={() => scroll('right')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full 
-                             bg-white/90 shadow-lg hover:bg-white transition-opacity duration-200
-                             opacity-0 group-hover:opacity-100"
-                >
-                    <ChevronRight className="w-6 h-6" />
-                </button>
+                {scrollState.canScrollRight && (
+                    <button
+                        onClick={() => scroll('right')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full
+                            bg-gray-900/80 shadow-lg hover:bg-gray-900 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                        <ChevronRight className="w-6 h-6 text-white" />
+                    </button>
+                )}
 
                 <div
                     ref={scrollContainerRef}
@@ -107,13 +157,16 @@ const ThemeCard: React.FC<{
 }> = ({ theme, isSelected, onSelect }) => (
     <button
         onClick={() => onSelect(theme.id)}
-        className={`w-full p-4 sm:p-3 rounded-lg border transition-all ${isSelected
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-blue-200'
+        className={`w-full p-4 sm:p-3 rounded-lg transition-all
+            ${isSelected
+                ? 'bg-blue-500 text-white border-transparent'
+                : 'bg-white hover:bg-gray-50 border border-gray-200'
             }`}
     >
         <span className="text-2xl sm:text-xl mb-2 sm:mb-1 block">{theme.icon}</span>
-        <span className="text-base sm:text-sm font-medium">{theme.name}</span>
-        <span className="text-sm sm:text-xs text-gray-500 block mt-1">{theme.category}</span>
+        <span className="text-base sm:text-sm font-medium text-black">{theme.name}</span>
+        <span className={`text-sm sm:text-xs block mt-1 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+            {theme.category}
+        </span>
     </button>
 );
