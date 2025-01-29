@@ -2,18 +2,21 @@ import React from 'react';
 
 const BackgroundLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
-        <div className="min-h-screen relative bg-gradient-to-br from-indigo-800 via-purple-900 to-violet-950 overflow-hidden">
-            {/* Enhanced animated orbs with more dramatic effects */}
-            <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[80px] opacity-50 animate-blob" />
-            <div className="fixed top-1/4 right-1/4 w-[500px] h-[500px] bg-fuchsia-500 rounded-full mix-blend-overlay filter blur-[80px] opacity-50 animate-blob animation-delay-2000" />
-            <div className="fixed -bottom-32 left-1/3 w-[700px] h-[700px] bg-violet-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-50 animate-blob animation-delay-4000" />
+        <div className="fixed inset-0 min-h-screen w-full overflow-auto bg-gradient-to-br from-indigo-800 via-purple-900 to-violet-950">
+            {/* Background wrapper that stays fixed */}
+            <div className="fixed inset-0 w-full h-full">
+                {/* Enhanced animated orbs with more dramatic effects */}
+                <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[80px] opacity-50 animate-blob" />
+                <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-fuchsia-500 rounded-full mix-blend-overlay filter blur-[80px] opacity-50 animate-blob animation-delay-2000" />
+                <div className="absolute -bottom-32 left-1/3 w-[700px] h-[700px] bg-violet-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-50 animate-blob animation-delay-4000" />
 
-            {/* Light streaks */}
-            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(255,255,255,0.05)_100%)] pointer-events-none"></div>
-            <div className="fixed inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] animate-grain pointer-events-none"></div>
+                {/* Light streaks */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(255,255,255,0.05)_100%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] animate-grain" />
+            </div>
 
-            {/* Content container with enhanced blur effect */}
-            <div className="relative min-h-screen">
+            {/* Scrollable content container */}
+            <div className="relative min-h-screen w-full">
                 {children}
             </div>
         </div>
@@ -67,6 +70,17 @@ style.textContent = `
 
   .animate-grain {
     animation: grain 8s infinite linear;
+  }
+
+  /* Disable pull-to-refresh behavior */
+  :root {
+    overscroll-behavior: none;
+  }
+
+  /* Ensure background covers any potential overflow */
+  body {
+    background-color: rgb(55, 48, 163); /* Matches from-indigo-800 */
+    overscroll-behavior: none;
   }
 `;
 document.head.appendChild(style);
