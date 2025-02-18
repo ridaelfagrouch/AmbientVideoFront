@@ -1,6 +1,5 @@
-// src/App.tsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import AmbientVideoGenerator from './components/AmbientVideoGenerator';
 
 const queryClient = new QueryClient({
@@ -17,7 +16,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AmbientVideoGenerator />
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />}
+      {/* {process.env.NODE_ENV === 'development' && <ReactQueryDevtools />} */}
     </QueryClientProvider>
   );
 }
